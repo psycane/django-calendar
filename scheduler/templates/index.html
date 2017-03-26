@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+
+<head>
+    <title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1"> {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/calendar.css' %}">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+</head>
+
+<body>
+    <div class="greyBox" id="greybox">
+        <div id="loader"></div>
+    </div>
+    <span id="refresh_icon"><i class="fa fa-refresh" aria-hidden="true"></i></span>
+    <div id="wrap_calendar">
+        {% include 'calendar.html' %}
+    </div>
+    <div id="create_event_dialog" title="">
+        <form id="create_event_form">
+            <input type="text" name="event_name" id="event_name" placeholder="Event Name">
+            <br>
+            <br>
+            <input type="text" name="event_location" id="event_location" placeholder="Location">
+            <br>
+            <br>
+            <label for="event_start_date">Starts</label>
+            <br>
+            <input type="date" name="event_start_date" id="event_start_date">
+            <input type="time" name="event_start_time" id="event_start_time">
+            <br>
+            <br>
+            <label for="event_end_date">Ends</label>
+            <br>
+            <input type="date" name="event_end_date" id="event_end_date">
+            <input type="time" name="event_end_time" id="event_end_time">
+            <br>
+            <br>
+            <label for="event_description">Description</label>
+            <br>
+            <textarea name="event_description" id="event_description" rows="5"></textarea>
+            <br>
+            <br>
+            <br>
+            <button id="event_cancel">Cancel</button>
+            <button type="submit" id="event_save">Save</button>
+        </form>
+    </div>
+    {% csrf_token %}
+    <script type="text/javascript" src="{% static 'js/calendar.js' %}"></script>
+</body>
+
+</html>

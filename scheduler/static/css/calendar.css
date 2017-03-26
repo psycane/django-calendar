@@ -1,0 +1,216 @@
+body {
+    font-family: "Tahoma";
+    width: 100%;
+}
+
+#refresh_icon {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    color: #2ed39e;
+    cursor: pointer;
+}
+
+
+/* Calendar CSS */
+
+#calendar_heading {
+    text-align: center;
+    padding: 20px;
+}
+
+#calendar_body {
+    width: 100%;
+    position: absolute;
+}
+
+#calendar_body ul {
+    list-style: none;
+    width: 100%;
+    clear: both;
+    padding: 0;
+    margin: 0;
+}
+
+#calendar_body li {
+    float: left;
+    display: block;
+    width: 14.2857142857%;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 1px solid #e5e6e7;
+}
+
+#calendar_body ul.weekdays {
+    height: 40px;
+}
+
+#calendar_body ul.weekdays li {
+    line-height: 20px;
+    border: none !important;
+    padding: 10px 6px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #b3b3b3;
+}
+
+#calendar_body .days li {
+    height: 150px;
+}
+
+#calendar_body .days li:hover {
+    background: #2bc493;
+    cursor: pointer;
+}
+
+#calendar_body .date {
+    padding: 4px;
+    width: 20px;
+    float: left;
+    color: #b3b3b3;
+}
+
+.noday {
+    background-color: #f8f8f8;
+}
+
+
+/* GreyBox and Loader */
+
+.greyBox {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background: rgba(0, 0, 0, .6);
+    z-index: 1;
+    display: none;
+}
+
+#loader {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    margin-top: -41px;
+    margin-left: -41px;
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    border-bottom: 16px solid #3498db;
+    width: 50px;
+    height: 50px;
+    -webkit-animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
+}
+
+#create_event_dialog {
+    z-index: 3;
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* create_event_dialog Box CSS */
+
+#create_event_dialog {
+    display: none;
+}
+
+#create_event_dialog #event_description {
+    resize: none;
+    border: 1px solid #e5e6e7;
+    border-radius: 4px;
+    width: 250px;
+    padding: 7px;
+    color: #777777;
+    font-size: 13px;
+}
+
+#create_event_dialog input[type="text"] {
+    border: 1px solid #e5e6e7;
+    border-radius: 4px;
+    width: 250px;
+    padding: 7px;
+    color: #777777;
+}
+
+#create_event_dialog input[type="date"] {
+    border: 1px solid #e5e6e7;
+    border-radius: 4px;
+    color: #777777;
+}
+
+#create_event_dialog input[type="time"] {
+    border: 1px solid #e5e6e7;
+    border-radius: 4px;
+    color: #777777;
+}
+
+#create_event_dialog label {
+    color: #777777;
+    font-size: 13px;
+    margin-left: 10px;
+}
+
+#create_event_dialog button {
+    color: white;
+    width: 100px;
+    padding: 5px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#create_event_dialog #event_save {
+    background-color: #ff8787;
+    border: 1px solid #ff8787;
+    float: right;
+}
+
+#create_event_dialog #event_cancel {
+    float: left;
+    background-color: #b3b3b3;
+    border: 1px solid #b3b3b3;
+}
+
+.ui-dialog.create_event_dialog .ui-widget-header {
+    border: none;
+    color: #ff8787;
+    background: white;
+    font-weight: bold;
+}
+
+
+/* Events Table CSS */
+
+.days .events_table {
+    position: absolute;
+    width: 100%;
+    padding: 0;
+    margin-top: 30px;
+    table-layout: fixed;
+}
+
+.days .events_table td {
+    padding: 4px;
+    border: 1px solid #2bc493;
+    overflow: hidden;
+}

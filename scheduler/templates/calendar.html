@@ -1,0 +1,49 @@
+<div id="calendar_heading">
+    <select name="select_month" id="select_month">
+        {% for month in months %} {% if current_month == forloop.counter %}
+        <option data-month_code="{{ forloop.counter }}" value="{{ month }}" selected="selected">{{ month }}</option>
+        {% else %}
+        <option data-month_code="{{ forloop.counter }}" value="{{ month }}">{{ month }}</option>
+        {% endif %} {% endfor %}
+    </select>
+    <select name="select_year" id="select_year">
+        {% for year in years %} {% if current_year == year %}
+        <option data-month_code="{{ year }}" value="{{ year }}" selected="selected">{{ year }}</option>
+        {% else %}
+        <option data-month_code="{{ year }}" value="{{ year }}">{{ year }}</option>
+        {% endif %} {% endfor %}
+    </select>
+</div>
+<div id="calendar_body">
+    <ul class="weekdays">
+        {% for weekday in weekdays %}
+        <li>{{ weekday }}</li>
+        {% endfor %}
+    </ul>
+    {% for row in calendar_data %}
+    <ul class="days">
+        <table class="events_table" cellpadding="0" cellspacing="2">
+            <tbody>
+                <tr>
+                    <td colspan="2"">Event 1</td>
+                    <td>n</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+            </tbody>
+        </table>
+        {% for date in row %} {% if date.3 == 'current' %}
+        <li class="date_block">
+            <div class="date" data-month="{{ date.1 }}" data-year="{{ date.2 }}" data-day="{{ date.0 }}" data-weekday="{{ forloop.counter0 }}">{{ date.0 }}</div>
+        </li>
+        {% else %}
+        <li class="date_block noday">
+            <div class="date" data-month="{{ date.1 }}" data-year="{{ date.2 }}" data-day="{{ date.0 }}" data-weekday="{{ forloop.counter0 }}">{{ date.0 }}</div>
+        </li>
+        {% endif %} {% endfor %}
+    </ul>
+    {% endfor %}
+</div>
