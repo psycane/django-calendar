@@ -58,11 +58,15 @@ $(document).ready(function() {
     $(document).on('mouseover', '#calendar_body .days li', function(e) {
         e.preventDefault();
         $(this).find('.date').css('color', '#f8f8f8');
+        $(this).find('.event').css('background-color','#f8f8f8');
+        $(this).find('.event').css('color','#2bc493');
     });
 
     $(document).on('mouseout', '#calendar_body .days li', function(e) {
         e.preventDefault();
         $(this).find('.date').css('color', '#b3b3b3');
+        $(this).find('.event').css('background-color','white');
+        $(this).find('.event').css('color','#2bc493');
     });
 
     $(document).on('change', '#select_month, #select_year', function(e) {

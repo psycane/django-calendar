@@ -36,7 +36,6 @@ body {
     float: left;
     display: block;
     width: 14.2857142857%;
-    padding: 5px;
     box-sizing: border-box;
     border: 1px solid #e5e6e7;
 }
@@ -51,7 +50,7 @@ body {
     padding: 10px 6px;
     font-size: 16px;
     font-weight: bold;
-    color: #b3b3b3;
+    color: #777777;
 }
 
 #calendar_body .days li {
@@ -67,7 +66,7 @@ body {
     padding: 4px;
     width: 20px;
     float: left;
-    color: #b3b3b3;
+    color: #777777;
 }
 
 .noday {
@@ -188,7 +187,7 @@ body {
 #create_event_dialog #event_cancel {
     float: left;
     background-color: #b3b3b3;
-    border: 1px solid #b3b3b3;
+    border: 1px solid #777777;
 }
 
 .ui-dialog.create_event_dialog .ui-widget-header {
@@ -201,16 +200,26 @@ body {
 
 /* Events Table CSS */
 
-.days .events_table {
-    position: absolute;
+.event {
     width: 100%;
-    padding: 0;
-    margin-top: 30px;
-    table-layout: fixed;
+    float: left;
+    color: #2bc493;
+    border-top: 3px solid #2bc493;
+    border-bottom: 1px solid #2bc493;
+    border-radius: 2px;
+    overflow: hidden;
+    height: 20px;
+    margin-bottom: 4px;
 }
 
-.days .events_table td {
-    padding: 4px;
-    border: 1px solid #2bc493;
-    overflow: hidden;
+.start {
+    border-left: 1px solid #2bc493;
+    width: 95%;
+    float: right;
+}
+
+.end {
+    border-right: 4px solid #2bc493;
+    width: 95%;
+    float: left;
 }

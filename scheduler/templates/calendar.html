@@ -1,3 +1,4 @@
+{% load filter %}
 <div id="calendar_heading">
     <select name="select_month" id="select_month">
         {% for month in months %} {% if current_month == forloop.counter %}
@@ -22,28 +23,30 @@
     </ul>
     {% for row in calendar_data %}
     <ul class="days">
-        <table class="events_table" cellpadding="0" cellspacing="2">
-            <tbody>
-                <tr>
-                    <td colspan="2"">Event 1</td>
-                    <td>n</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-
-            </tbody>
-        </table>
-        {% for date in row %} {% if date.3 == 'current' %}
-        <li class="date_block">
-            <div class="date" data-month="{{ date.1 }}" data-year="{{ date.2 }}" data-day="{{ date.0 }}" data-weekday="{{ forloop.counter0 }}">{{ date.0 }}</div>
-        </li>
+        {% for date in row %} 
+        {% if date.3 == 'current' %}
+            <li class="date_block">
+                <div class="date" data-month="{{ date.1 }}" data-year="{{ date.2 }}" data-day="{{ date.0 }}" data-weekday="{{ forloop.counter0 }}">{{ date.0 }}</div>
+                {% if events_data|get_item:date %} 
+                    {% for event in events_data|get_item:date %} 
+                        {% if event.0 == event_start|get_item:date and event.0 == event_end|get_item:date %}
+                            <div class="event start end" data-id="{{ event.0 }}" data-name="{{ event.1 }}">{{ event.1 }}</div>
+                        {% elif event.0 == event_start|get_item:date %}
+                            <div class="event start" data-id="{{ event.0 }}" data-name="{{ event.1 }}">{{ event.1 }}</div>
+                        {% elif event.0 == event_end|get_item:date %}
+                            <div class="event end" data-id="{{ event.0 }}" data-name="{{ event.1 }}"></div>
+                        {% else %}
+                            <div class="event" data-id="{{ event.0 }}" data-name="{{ event.1 }}"></div>
+                        {% endif %} 
+                    {% endfor %} 
+                {% endif %}
+            </li>
         {% else %}
-        <li class="date_block noday">
-            <div class="date" data-month="{{ date.1 }}" data-year="{{ date.2 }}" data-day="{{ date.0 }}" data-weekday="{{ forloop.counter0 }}">{{ date.0 }}</div>
-        </li>
-        {% endif %} {% endfor %}
+            <li class="date_block noday">
+                <div class="date" data-month="{{ date.1 }}" data-year="{{ date.2 }}" data-day="{{ date.0 }}" data-weekday="{{ forloop.counter0 }}">{{ date.0 }}</div>
+            </li>
+        {% endif %} 
+        {% endfor %}
     </ul>
     {% endfor %}
 </div>

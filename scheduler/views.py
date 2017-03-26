@@ -1,11 +1,15 @@
 from .models import Event
 import calendar
 import datetime
+from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.template.defaulttags import register
+from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
 import json
+import pytz
 
 calendar.setfirstweekday(calendar.SUNDAY)
 year_from, year_to = 1950, 2050
@@ -31,6 +35,11 @@ calendar_context = {
                  'Friday',
                  'Saturday'],
 }
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
 
 
 def generateCalendarData(current_month, current_year):
@@ -77,6 +86,41 @@ def generateCalendarData(current_month, current_year):
     return calendar_data
 
 
+def generateEventsData(events, calendar_data, current_month, current_year):
+    rows, cols = len(calendar_data), 7
+    events_data = {}
+    start = {}
+    end = {}
+    for event in events:
+        event_id = event.id
+        event_name = event.event_name
+        start_date = timezone.localtime(event.start_date)
+        end_date = timezone.localtime(event.end_date)
+        st, en = None, None
+        for row in range(rows):
+            for col in range(cols):
+                date_tuple = calendar_data[row][col]
+                cur_date = timezone.make_aware(datetime.datetime(date_tuple[2],
+                                                                 date_tuple[1],
+                                                                 date_tuple[0],
+                                                                 start_date.hour,
+                                                                 start_date.minute,
+                                                                 start_date.second),
+                                               pytz.timezone(settings.TIME_ZONE))
+                if start_date <= cur_date <= end_date:
+                    if not st:
+                        st = date_tuple
+                    en = date_tuple
+                    if events_data.get(date_tuple):
+                        events_data[date_tuple].append((event_id, event_name))
+                    else:
+                        events_data[date_tuple] = [(event_id, event_name)]
+
+        start[st] = event_id
+        end[en] = event_id
+    return (start, end, events_data)
+
+
 def validateEventDetails(req):
     response = True
     error = None
@@ -103,7 +147,7 @@ def validateEventDetails(req):
                             error = 'Start date cannot be greater than end date!'
                     except:
                         response = False
-                        error = 'Invalid date format!'
+                        error = 'Invalid date or time format!'
                 else:
                     response = False
                     error = 'Description too long!'
@@ -116,6 +160,7 @@ def validateEventDetails(req):
     else:
         response = False
         error = 'Empty values not allowed!'
+
     return(response, error)
 
 
@@ -133,9 +178,19 @@ def home(request):
                 if 1 <= current_month <= 12 and year_from <= current_year <= year_to:
                     calendar_context['current_month'] = current_month
                     calendar_context['current_year'] = current_year
-                    calendar_context['calendar_data'] = generateCalendarData(current_month,
-                                                                             current_year)
-                    print(generateCalendarData(current_month, current_year))
+                    calendar_data = generateCalendarData(current_month,
+                                                         current_year)
+                    calendar_context['calendar_data'] = calendar_data
+                    print(calendar_data)
+                    events = Event.objects.all()
+                    start, end, events_data = generateEventsData(events,
+                                                                 calendar_data,
+                                                                 current_month,
+                                                                 current_year)
+                    calendar_context['events_data'] = events_data
+                    calendar_context['event_start'] = start
+                    calendar_context['event_end'] = end
+                    print(events_data, start, end)
 
                 else:
                     error = 'Out of bounds!'
@@ -158,8 +213,17 @@ def home(request):
     calendar_context['current_month'] = current_month
     calendar_context['current_year'] = current_year
     calendar_context['current_day'] = current_day
-    calendar_context['calendar_data'] = generateCalendarData(current_month,
-                                                             current_year)
+    calendar_data = generateCalendarData(current_month,
+                                         current_year)
+    calendar_context['calendar_data'] = calendar_data
+    events = Event.objects.all()
+    start, end, events_data = generateEventsData(events,
+                                                 calendar_data,
+                                                 current_month,
+                                                 current_year)
+    calendar_context['events_data'] = events_data
+    calendar_context['event_start'] = start
+    calendar_context['event_end'] = end
     return render(request, 'index.html', context=calendar_context)
 
 
@@ -187,6 +251,8 @@ def create_event(request):
                                              start_date=start_date,
                                              end_date=end_date,
                                              description=event_description)
+                calendar_data = generateCalendarData(start_date.month,
+                                                     start_date.year)
 
         else:
             error = 'Data not received!'
