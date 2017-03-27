@@ -4,8 +4,8 @@ import datetime
 from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
-from django.template.loader import render_to_string
 from django.template.defaulttags import register
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
 import json
@@ -43,6 +43,8 @@ def get_item(dictionary, key):
 
 
 def generateCalendarData(current_month, current_year):
+    current_month = int(current_month)
+    current_year = int(current_year)
     # Handling current month's dates
     calendar_data = calendar.monthcalendar(current_year,
                                            current_month)
@@ -232,6 +234,7 @@ def create_event(request):
     error = None
     if request.method == 'POST':
         req = request.POST
+        print (req)
         if req:
             response, error = validateEventDetails(req)
             if response:
@@ -251,8 +254,19 @@ def create_event(request):
                                              start_date=start_date,
                                              end_date=end_date,
                                              description=event_description)
-                calendar_data = generateCalendarData(start_date.month,
-                                                     start_date.year)
+                current_month = req.get("current_month")
+                current_year = req.get("current_year")
+                calendar_data = generateCalendarData(current_month,
+                                                     current_year)
+                calendar_context['calendar_data'] = calendar_data
+                events = Event.objects.all()
+                start, end, events_data = generateEventsData(events,
+                                                             calendar_data,
+                                                             current_month,
+                                                             current_year)
+                calendar_context['events_data'] = events_data
+                calendar_context['event_start'] = start
+                calendar_context['event_end'] = end
 
         else:
             error = 'Data not received!'
@@ -260,5 +274,85 @@ def create_event(request):
         if error:
             return HttpResponseBadRequest(error)
         else:
-            return HttpResponse(json.dumps({'message': 'Event created successfully!'}))
+            calendar_html = render_to_string('calendar.html',
+                                             context=calendar_context)
+            return HttpResponse(json.dumps({'message': 'Event created successfully!', 'html': calendar_html}))
+    raise Http404
+
+
+@ensure_csrf_cookie
+def query_event(request):
+    error = None
+    if request.method == 'POST':
+        req = request.POST
+        if req:
+            event_id = req.get('event_id')
+            if event_id:
+                event = Event.objects.filter(id=event_id)
+                print(event, type(event))
+                if event:
+                    location = event[0].location
+                    start_date = timezone.localtime(
+                        event[0].start_date).strftime('%-I:%M %p, %A, %b %-d')
+                    end_date = timezone.localtime(
+                        event[0].end_date).strftime('%-I:%M %p, %A, %b %-d')
+                    print(start_date, end_date)
+                    description = event[0].description
+                    event_data = {
+                        'location': location,
+                        'start_date': start_date,
+                        'end_date': end_date,
+                        'description': description
+                    }
+                else:
+                    error = 'No data found for this event id!'
+            else:
+                error = 'Blank event id not allowed!'
+        else:
+            error = 'Data not received!'
+
+        if error:
+            return HttpResponseBadRequest(error)
+        else:
+            return HttpResponse(json.dumps(event_data))
+    raise Http404
+
+
+@ensure_csrf_cookie
+def delete_event(request):
+    error = None
+    if request.method == 'POST':
+        req = request.POST
+        if req:
+            event_id = req.get('event_id')
+            if event_id:
+                event = Event.objects.filter(id=event_id)
+                if event:
+                    event.delete()
+                    current_month = req.get("current_month")
+                    current_year = req.get("current_year")
+                    calendar_data = generateCalendarData(current_month,
+                                                         current_year)
+                    calendar_context['calendar_data'] = calendar_data
+                    events = Event.objects.all()
+                    start, end, events_data = generateEventsData(events,
+                                                                 calendar_data,
+                                                                 current_month,
+                                                                 current_year)
+                    calendar_context['events_data'] = events_data
+                    calendar_context['event_start'] = start
+                    calendar_context['event_end'] = end
+                else:
+                    error = 'No data found for this event id!'
+            else:
+                error = 'Blank event id not allowed!'
+        else:
+            error = 'Data not received!'
+
+        if error:
+            return HttpResponseBadRequest(error)
+        else:
+            calendar_html = render_to_string('calendar.html',
+                                             context=calendar_context)
+            return HttpResponse(json.dumps({'message': 'Event deleted successfully!', 'html': calendar_html}))
     raise Http404

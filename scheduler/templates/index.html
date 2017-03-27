@@ -25,6 +25,7 @@
     </div>
     <div id="create_event_dialog" title="">
         <form id="create_event_form">
+            <br>
             <input type="text" name="event_name" id="event_name" placeholder="Event Name">
             <br>
             <br>
@@ -52,6 +53,23 @@
             <button id="event_cancel">Cancel</button>
             <button type="submit" id="event_save">Save</button>
         </form>
+    </div>
+    <div id="show_event_dialog" title="">
+        <div id="event_id" data-id="">
+            <p class="heading">Where</p>
+            <div class="event_data_div" id="event_location"></div>
+            <br>
+            <p class="heading">When</p>
+            <div class="event_data_div" id="event_time"></div>
+            <br>
+            <p class="heading">Description</p>
+            <div class="event_data_div" id="event_description"></div>
+            <br>
+            <br>
+            <br>
+            <button id="event_delete">Delete</button>
+            <button id="event_edit">Edit</button>
+        </div>
     </div>
     {% csrf_token %}
     <script type="text/javascript" src="{% static 'js/calendar.js' %}"></script>

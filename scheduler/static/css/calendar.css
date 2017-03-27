@@ -58,7 +58,7 @@ body {
 }
 
 #calendar_body .days li:hover {
-    background: #2bc493;
+    background: #2ed39e;
     cursor: pointer;
 }
 
@@ -147,7 +147,7 @@ body {
     border: 1px solid #e5e6e7;
     border-radius: 4px;
     width: 250px;
-    padding: 7px;
+    padding: 4px;
     color: #777777;
 }
 
@@ -164,7 +164,7 @@ body {
 }
 
 #create_event_dialog label {
-    color: #777777;
+    color: #b3b3b3;
     font-size: 13px;
     margin-left: 10px;
 }
@@ -198,6 +198,54 @@ body {
 }
 
 
+/* show_event_dialog CSS */
+
+#show_event_dialog {
+    display: none;
+}
+
+#show_event_dialog .heading {
+    color: #b3b3b3;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+#show_event_dialog .event_data_div {
+    color: #777777;
+    font-size: 13px;
+    word-wrap: break-word;
+    text-align: justify;
+}
+
+#show_event_dialog button {
+    color: white;
+    width: 100px;
+    padding: 5px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#show_event_dialog #event_edit {
+    background-color: #ff8787;
+    border: 1px solid #ff8787;
+    float: right;
+}
+
+#show_event_dialog #event_delete {
+    float: left;
+    background-color: #b3b3b3;
+    border: 1px solid #777777;
+}
+
+.ui-dialog.show_event_dialog .ui-widget-header {
+    border: none;
+    color: #ff8787;
+    background: white;
+    font-weight: bold;
+}
+
+
 /* Events Table CSS */
 
 .event {
@@ -210,6 +258,7 @@ body {
     overflow: hidden;
     height: 20px;
     margin-bottom: 4px;
+    cursor: pointer;
 }
 
 .start {
