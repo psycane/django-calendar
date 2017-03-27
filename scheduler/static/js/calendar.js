@@ -100,7 +100,7 @@ $(document).ready(function() {
     $(document).on('click', '.date_block', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        console.log("YYY");
+        console.log('YYY');
         $('#greybox').show();
         var date_div = $(this).find('.date');
         day = date_div.data('day');
@@ -109,7 +109,8 @@ $(document).ready(function() {
         weekday = date_div.data('weekday');
         var title_date = weekdays[weekday] + ', ' + day + ' ' + months[month] + ' ' + year;
         console.log(title_date);
-        $('#event_start_date').val(formatDate(year, month, day));
+        $('#create_event_dialog form').find("input[type=text], input[type=date], input[type=time], textarea").val("");
+        $('#create_event_dialog #event_start_date').val(formatDate(year, month, day));
         $('#create_event_dialog').dialog({
             draggable: false,
             resizable: false,
@@ -123,35 +124,38 @@ $(document).ready(function() {
         $('#greybox').hide();
     });
 
-    $(document).on('click', '#event_cancel', function(e) {
+    $(document).on('click', '#create_event_dialog #event_cancel', function(e) {
         e.preventDefault();
         $('#create_event_dialog').dialog('close');
+        if (editing) {
+            editing = false;
+            event_id_global = '';
+        }
     })
 
     $(document).on('submit', '#create_event_form', function(e) {
         e.preventDefault();
-        $('#create_event_dialog').dialog('close');
         $('#greybox').show();
-        console.log('processing...');
+        console.log(editing, event_id_global);
         var month = $('#select_month').find('option:selected').data('month_code');
         var year = $('#select_year').find('option:selected').attr('value');
         console.log(month, year);
         var data = $(this).serializeArray();
         data.push({
-            name: "current_month",
+            name: 'current_month',
             value: month
         });
         data.push({
-            name: "current_year",
+            name: 'current_year',
             value: year
         });
         if (editing) {
             data.push({
-                name: "editing",
+                name: 'editing',
                 value: true
             });
             data.push({
-                name: "event_id",
+                name: 'event_id',
                 value: event_id_global
             })
         }
@@ -163,18 +167,16 @@ $(document).ready(function() {
             data: data,
             success: function(result) {
                 console.log(result);
+                $('#create_event_dialog').dialog('close');
                 alert(result.message);
                 $('#wrap_calendar').html(result.html);
                 $('#greybox').hide();
-                editing = false;
-                event_id_global = '';
             },
             error: function(result) {
                 console.error(result.responseText);
+                $('#create_event_dialog').dialog('close');
                 alert(result.responseText);
                 $('#greybox').hide();
-                editing = false;
-                event_id_global = '';
             }
         });
     });
@@ -182,10 +184,10 @@ $(document).ready(function() {
     $(document).on('click', '.event', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        console.log("TTT");
+        console.log('TTT');
         $('#greybox').show();
-        var event_id = $(this).data("id");
-        var event_name = $(this).data("name");
+        var event_id = $(this).data('id');
+        var event_name = $(this).data('name');
         var data = {
             event_id: event_id
         }
@@ -196,10 +198,10 @@ $(document).ready(function() {
             data: data,
             success: function(result) {
                 console.log(result);
-                $('#show_event_dialog #event_location').html(result["location"]);
-                $('#show_event_dialog #event_time').html("Starts: " + result["start_date"] + "<br>" + "Ends: " + result["end_date"]);
-                $('#show_event_dialog #event_description').html(result["description"]);
-                $('#show_event_dialog #event_id').data("id", event_id);
+                $('#show_event_dialog #event_location').html(result['location']);
+                $('#show_event_dialog #event_time').html('Starts: ' + result['start_date'] + '<br>' + 'Ends: ' + result['end_date']);
+                $('#show_event_dialog #event_description').html(result['description']);
+                $('#show_event_dialog #event_id').data('id', event_id);
                 $('#show_event_dialog').dialog({
                     draggable: false,
                     resizable: false,
@@ -221,8 +223,8 @@ $(document).ready(function() {
 
     $(document).on('click', '#show_event_dialog #event_delete', function(e) {
         e.preventDefault();
-        if (confirm("Are you sure?")) {
-            var event_id = $(this).parent().data("id");
+        if (confirm('Are you sure?')) {
+            var event_id = $(this).parent().data('id');
             console.log(event_id);
             var month = $('#select_month').find('option:selected').data('month_code');
             var year = $('#select_year').find('option:selected').attr('value');
@@ -255,7 +257,7 @@ $(document).ready(function() {
         e.preventDefault();
         $('#show_event_dialog').dialog('close');
         $('#greybox').show();
-        var event_id = $(this).parent().data("id");
+        var event_id = $(this).parent().data('id');
         editing = true;
         event_id_global = event_id;
         var data = {
@@ -268,24 +270,30 @@ $(document).ready(function() {
             data: data,
             success: function(result) {
                 console.log(result);
-                $('#create_event_dialog #event_name').val(result["name"]);
-                $('#create_event_dialog #event_location').val(result["location"]);
-                $('#create_event_dialog #event_start_date').val(formatDate(result["start_year"], result["start_month"], result["start_day"]));
-                $('#create_event_dialog #event_start_time').val(result["start_time_24hr"]);
-                $('#create_event_dialog #event_end_date').val(formatDate(result["end_year"], result["end_month"], result["end_day"]));
-                $('#create_event_dialog #event_end_time').val(result["end_time_24hr"]);
-                $('#create_event_dialog #event_description').val(result["description"]);
+                $('#create_event_dialog #event_name').val(result['name']);
+                $('#create_event_dialog #event_location').val(result['location']);
+                $('#create_event_dialog #event_start_date').val(formatDate(result['start_year'], result['start_month'], result['start_day']));
+                $('#create_event_dialog #event_start_time').val(result['start_time_24hr']);
+                $('#create_event_dialog #event_end_date').val(formatDate(result['end_year'], result['end_month'], result['end_day']));
+                $('#create_event_dialog #event_end_time').val(result['end_time_24hr']);
+                $('#create_event_dialog #event_description').val(result['description']);
                 $('#create_event_dialog').dialog({
                     draggable: false,
                     resizable: false,
                     modal: false,
-                    title: "Edit " + result["name"],
-                    dialogClass: 'create_event_dialog'
+                    title: 'Edit ' + result['name'],
+                    dialogClass: 'create_event_dialog',
+                    close: function(e,ui){
+                    	editing=false;
+                    	event_id_global='';
+                    }
                 });
             },
             error: function(result) {
                 console.error(result.responseText);
                 $('#greybox').hide();
+                editing = false;
+                event_id_global = '';
             }
         });
     });

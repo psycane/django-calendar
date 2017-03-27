@@ -38,6 +38,7 @@ body {
     width: 14.2857142857%;
     box-sizing: border-box;
     border: 1px solid #e5e6e7;
+    overflow-y: auto;
 }
 
 #calendar_body ul.weekdays {
@@ -259,16 +260,4 @@ body {
     height: 20px;
     margin-bottom: 4px;
     cursor: pointer;
-}
-
-.start {
-    border-left: 1px solid #2bc493;
-    width: 95%;
-    float: right;
-}
-
-.end {
-    border-right: 4px solid #2bc493;
-    width: 95%;
-    float: left;
 }

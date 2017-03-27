@@ -293,7 +293,10 @@ def create_event(request):
         else:
             calendar_html = render_to_string('calendar.html',
                                              context=calendar_context)
-            return HttpResponse(json.dumps({'message': 'Event created successfully!', 'html': calendar_html}))
+            if req.get('editing'):
+                return HttpResponse(json.dumps({'message': 'Event edited successfully!', 'html': calendar_html}))
+            else:
+                return HttpResponse(json.dumps({'message': 'Event created successfully!', 'html': calendar_html}))
     raise Http404
 
 
