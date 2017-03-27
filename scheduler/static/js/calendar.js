@@ -25,6 +25,9 @@ $(document).ready(function() {
         return [year, month, day].join('-');
     }
 
+    var editing = false;
+    var event_id_global = '';
+
     months = {
         1: 'January',
         2: 'February',
@@ -63,7 +66,7 @@ $(document).ready(function() {
     });
 
     $(document).on('mouseout', '#calendar_body .days li', function(e) {
-        $(this).find('.date').css('color', '#b3b3b3');
+        $(this).find('.date').css('color', '#777777');
         $(this).find('.event').css('background-color', 'white');
         $(this).find('.event').css('color', '#2bc493');
     });
@@ -114,7 +117,6 @@ $(document).ready(function() {
             title: title_date,
             dialogClass: 'create_event_dialog'
         });
-
     });
 
     $(document).on('dialogclose', '#create_event_dialog', function(e) {
@@ -143,6 +145,16 @@ $(document).ready(function() {
             name: "current_year",
             value: year
         });
+        if (editing) {
+            data.push({
+                name: "editing",
+                value: true
+            });
+            data.push({
+                name: "event_id",
+                value: event_id_global
+            })
+        }
         console.log(data);
         $.ajax({
             url: 'create_event/',
@@ -154,11 +166,15 @@ $(document).ready(function() {
                 alert(result.message);
                 $('#wrap_calendar').html(result.html);
                 $('#greybox').hide();
+                editing = false;
+                event_id_global = '';
             },
             error: function(result) {
                 console.error(result.responseText);
                 alert(result.responseText);
                 $('#greybox').hide();
+                editing = false;
+                event_id_global = '';
             }
         });
     });
@@ -233,5 +249,44 @@ $(document).ready(function() {
                 }
             });
         }
+    });
+
+    $(document).on('click', '#show_event_dialog #event_edit', function(e) {
+        e.preventDefault();
+        $('#show_event_dialog').dialog('close');
+        $('#greybox').show();
+        var event_id = $(this).parent().data("id");
+        editing = true;
+        event_id_global = event_id;
+        var data = {
+            event_id: event_id
+        }
+        $.ajax({
+            url: 'query_event/',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function(result) {
+                console.log(result);
+                $('#create_event_dialog #event_name').val(result["name"]);
+                $('#create_event_dialog #event_location').val(result["location"]);
+                $('#create_event_dialog #event_start_date').val(formatDate(result["start_year"], result["start_month"], result["start_day"]));
+                $('#create_event_dialog #event_start_time').val(result["start_time_24hr"]);
+                $('#create_event_dialog #event_end_date').val(formatDate(result["end_year"], result["end_month"], result["end_day"]));
+                $('#create_event_dialog #event_end_time').val(result["end_time_24hr"]);
+                $('#create_event_dialog #event_description').val(result["description"]);
+                $('#create_event_dialog').dialog({
+                    draggable: false,
+                    resizable: false,
+                    modal: false,
+                    title: "Edit " + result["name"],
+                    dialogClass: 'create_event_dialog'
+                });
+            },
+            error: function(result) {
+                console.error(result.responseText);
+                $('#greybox').hide();
+            }
+        });
     });
 });

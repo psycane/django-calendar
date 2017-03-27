@@ -234,7 +234,7 @@ def create_event(request):
     error = None
     if request.method == 'POST':
         req = request.POST
-        print (req)
+        print(req)
         if req:
             response, error = validateEventDetails(req)
             if response:
@@ -249,11 +249,28 @@ def create_event(request):
                                                         '%Y-%m-%d %H:%M')
                 end_date = datetime.datetime.strptime(event_end_date + ' ' + event_end_time,
                                                       '%Y-%m-%d %H:%M')
-                event = Event.objects.create(event_name=event_name,
-                                             location=event_location,
-                                             start_date=start_date,
-                                             end_date=end_date,
-                                             description=event_description)
+                print(req)
+                if req.get('editing'):
+                    event_id = req.get("event_id")
+                    if event_id:
+                        event = Event.objects.get(id=event_id)
+                        if event:
+                            event.event_name = event_name
+                            event.location = event_location
+                            event.start_date = start_date
+                            event.end_date = end_date
+                            event.description = event_description
+                            event.save()
+                        else:
+                            error = 'No record found for this event id!'
+                    else:
+                        error = 'Blank id received for editing event!'
+                else:
+                    event = Event.objects.create(event_name=event_name,
+                                                 location=event_location,
+                                                 start_date=start_date,
+                                                 end_date=end_date,
+                                                 description=event_description)
                 current_month = req.get("current_month")
                 current_year = req.get("current_year")
                 calendar_data = generateCalendarData(current_month,
@@ -291,18 +308,38 @@ def query_event(request):
                 event = Event.objects.filter(id=event_id)
                 print(event, type(event))
                 if event:
+                    name = event[0].event_name
                     location = event[0].location
-                    start_date = timezone.localtime(
-                        event[0].start_date).strftime('%-I:%M %p, %A, %b %-d')
-                    end_date = timezone.localtime(
-                        event[0].end_date).strftime('%-I:%M %p, %A, %b %-d')
-                    print(start_date, end_date)
+                    start_date_datetime = timezone.localtime(
+                        event[0].start_date)
+                    end_date_datetime = timezone.localtime(event[0].end_date)
+                    start_date = start_date_datetime.strftime(
+                        '%-I:%M %p, %A, %b %-d')
+                    start_time_24hr = start_date_datetime.strftime('%H:%M')
+                    end_date = end_date_datetime.strftime(
+                        '%-I:%M %p, %A, %b %-d')
+                    end_time_24hr = end_date_datetime.strftime('%H:%M')
+                    start_day = start_date_datetime.day
+                    start_month = start_date_datetime.month
+                    start_year = start_date_datetime.year
+                    end_day = end_date_datetime.day
+                    end_month = end_date_datetime.month
+                    end_year = end_date_datetime.year
                     description = event[0].description
                     event_data = {
+                        'name': name,
                         'location': location,
                         'start_date': start_date,
                         'end_date': end_date,
-                        'description': description
+                        'description': description,
+                        'start_time_24hr': start_time_24hr,
+                        'end_time_24hr': end_time_24hr,
+                        'start_day': start_day,
+                        'start_month': start_month,
+                        'start_year': start_year,
+                        'end_day': end_day,
+                        'end_month': end_month,
+                        'end_year': end_year,
                     }
                 else:
                     error = 'No data found for this event id!'
