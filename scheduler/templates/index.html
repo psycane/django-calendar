@@ -26,27 +26,30 @@
     <div id="create_event_dialog" title="">
         <form id="create_event_form">
             <br>
-            <input type="text" name="event_name" id="event_name" placeholder="Event Name">
+            <input type="text" name="event_name" id="event_name" placeholder="Event Name" required="">
             <br>
             <br>
-            <input type="text" name="event_location" id="event_location" placeholder="Location">
+            <input type="text" name="event_location" id="event_location" placeholder="Location" required="">
             <br>
             <br>
             <label for="event_start_date">Starts</label>
             <br>
-            <input type="date" name="event_start_date" id="event_start_date">
-            <input type="time" name="event_start_time" id="event_start_time">
+            <input type="date" name="event_start_date" id="event_start_date" required="">
+            <input type="time" name="event_start_time" id="event_start_time" required="">
             <br>
             <br>
             <label for="event_end_date">Ends</label>
             <br>
-            <input type="date" name="event_end_date" id="event_end_date">
-            <input type="time" name="event_end_time" id="event_end_time">
+            <input type="date" name="event_end_date" id="event_end_date" required="">
+            <input type="time" name="event_end_time" id="event_end_time" required="">
+            <br>
+            <br>
+            <input type="checkbox" name="event_all_day" id="event_all_day"><span id="event_all_day_text">All Day</span>
             <br>
             <br>
             <label for="event_description">Description</label>
             <br>
-            <textarea name="event_description" id="event_description" rows="5"></textarea>
+            <textarea name="event_description" id="event_description" rows="5" required=""></textarea>
             <br>
             <br>
             <br>

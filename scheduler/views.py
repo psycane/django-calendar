@@ -147,7 +147,7 @@ def processContext(current_month, current_year, event_query, data=None):
 
     # To highlight today's date if present in the calendar view
     now = datetime.datetime.now()
-    current_day = now.day if current_month == now.month else None
+    current_day = now.day if current_month == now.month and current_year == now.year else None
     calendar_context['current_day'] = current_day
 
     # Receives the calendar's data based on current month and current year
@@ -419,7 +419,7 @@ def create_event(request):
             else:
                 return HttpResponse(json.dumps({'message': 'Event created successfully!', 'html': calendar_html}))
 
-    raise Http404 # GET request not allowed
+    raise Http404  # GET request not allowed
 
 
 @ensure_csrf_cookie
@@ -487,7 +487,7 @@ def query_event(request):
         else:
             return HttpResponse(json.dumps(event_data))
 
-    raise Http404 # GET request not allowed
+    raise Http404  # GET request not allowed
 
 
 @ensure_csrf_cookie
@@ -524,4 +524,4 @@ def delete_event(request):
                                              context=calendar_context)
             return HttpResponse(json.dumps({'message': 'Event deleted successfully!', 'html': calendar_html}))
 
-    raise Http404 # GET request not allowed
+    raise Http404  # GET request not allowed

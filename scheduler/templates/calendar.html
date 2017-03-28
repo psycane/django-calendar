@@ -9,7 +9,7 @@
     </select>
     <select name="select_year" id="select_year">
         {% for year in years %}
-            <option data-month_code="{{ year }}" value="{{ year }}" {% if current_year == year %} selected="selected">{{ year }} {% endif %} </option>
+            <option data-month_code="{{ year }}" value="{{ year }}" {% if current_year == year %} selected="selected" {% endif %}>{{ year }}</option>
         {% endfor %}
     </select>
 </div>
@@ -25,7 +25,7 @@
     <ul class="days">
         {% for date in row %} 
             <li class="date_block {% if date.3 != 'current' %} noday {% endif %}">
-                <div class="date" data-month="{{ date.1 }}" data-year="{{ date.2 }}" data-day="{{ date.0 }}" data-weekday="{{ forloop.counter0 }}">{{ date.0 }}</div>
+                <div class="date {% if date.0 == current_day %}today{% endif %}" data-month="{{ date.1 }}" data-year="{{ date.2 }}" data-day="{{ date.0 }}" data-weekday="{{ forloop.counter0 }}">{{ date.0 }}</div>
                 {% if events_data|get_item:date %} 
                     {% for event in events_data|get_item:date %} 
                         <div class="event" data-id="{{ event.0 }}" data-name="{{ event.1 }}">{{ event.1 }}</div>
