@@ -2,6 +2,7 @@ from .models import Event
 import calendar
 import datetime
 from django.conf import settings
+from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.template.defaulttags import register
@@ -13,33 +14,6 @@ import pytz
 
 calendar.setfirstweekday(calendar.SUNDAY)
 year_from, year_to = 1950, 2050
-calendar_context = {
-    'months': ['January',
-               'February',
-               'March',
-               'April',
-               'May',
-               'June',
-               'July',
-               'August',
-               'September',
-               'October',
-               'November',
-               'December'],
-    'years': range(year_from, year_to + 1),
-    'weekdays': ['Sunday',
-                 'Monday',
-                 'Tuesday',
-                 'Wednesday',
-                 'Thursday',
-                 'Friday',
-                 'Saturday'],
-}
-
-
-@register.filter
-def get_item(dictionary, key):
-    return dictionary.get(key)
 
 
 def generateCalendarData(current_month, current_year):
@@ -123,6 +97,123 @@ def generateEventsData(events, calendar_data, current_month, current_year):
     return (start, end, events_data)
 
 
+def processContext(current_month, current_year, event_query, data=None):
+    error = None
+    calendar_context = {
+        'months': ['January',
+                   'February',
+                   'March',
+                   'April',
+                   'May',
+                   'June',
+                   'July',
+                   'August',
+                   'September',
+                   'October',
+                   'November',
+                   'December'],
+        'years': range(year_from, year_to + 1),
+        'weekdays': ['Sunday',
+                     'Monday',
+                     'Tuesday',
+                     'Wednesday',
+                     'Thursday',
+                     'Friday',
+                     'Saturday'],
+    }
+    calendar_context['current_month'] = current_month
+    calendar_context['current_year'] = current_year
+    now = datetime.datetime.now()
+    current_day = now.day if current_month == now.month else None
+    calendar_context['current_day'] = current_day
+    calendar_data = generateCalendarData(current_month,
+                                         current_year)
+    first_date = datetime.datetime(calendar_data[0][0][2],
+                                   calendar_data[0][0][1],
+                                   calendar_data[0][0][0],
+                                   0,
+                                   0,
+                                   0)
+    last_date = datetime.datetime(calendar_data[-1][-1][2],
+                                  calendar_data[-1][-1][1],
+                                  calendar_data[-1][-1][0],
+                                  23,
+                                  59,
+                                  59)
+
+    print(first_date, last_date)
+    calendar_context['calendar_data'] = calendar_data
+    print(event_query)
+    if event_query == 'show':
+        pass
+    elif event_query == 'create':
+        event_name = data.get('event_name')
+        event_location = data.get('event_location')
+        event_start_date = data.get('event_start_date')
+        event_start_time = data.get('event_start_time')
+        event_end_date = data.get('event_end_date')
+        event_end_time = data.get('event_end_time')
+        event_description = data.get('event_description')
+        start_date = datetime.datetime.strptime(event_start_date + ' ' + event_start_time,
+                                                '%Y-%m-%d %H:%M')
+        end_date = datetime.datetime.strptime(event_end_date + ' ' + event_end_time,
+                                              '%Y-%m-%d %H:%M')
+        event = Event.objects.create(event_name=event_name,
+                                     location=event_location,
+                                     start_date=start_date,
+                                     end_date=end_date,
+                                     description=event_description)
+    elif event_query == 'edit':
+        event_id = data.get("event_id")
+        if event_id:
+            event = Event.objects.get(id=event_id)
+            if event:
+                event_name = data.get('event_name')
+                event_location = data.get('event_location')
+                event_start_date = data.get('event_start_date')
+                event_start_time = data.get('event_start_time')
+                event_end_date = data.get('event_end_date')
+                event_end_time = data.get('event_end_time')
+                event_description = data.get('event_description')
+                start_date = datetime.datetime.strptime(event_start_date + ' ' + event_start_time,
+                                                        '%Y-%m-%d %H:%M')
+                end_date = datetime.datetime.strptime(event_end_date + ' ' + event_end_time,
+                                                      '%Y-%m-%d %H:%M')
+                event.event_name = event_name
+                event.location = event_location
+                event.start_date = start_date
+                event.end_date = end_date
+                event.description = event_description
+                event.save()
+            else:
+                error = 'No record found for this event id!'
+        else:
+            error = 'Blank id received for editing event!'
+    elif event_query == 'delete':
+        event_id = data.get('event_id')
+        if event_id:
+            event = Event.objects.filter(id=event_id)
+            if event:
+                event.delete()
+            else:
+                error = 'No data found for this event id!'
+        else:
+            error = 'Blank event id not allowed!'
+    else:
+        error = 'Unknown query!'
+
+    events = Event.objects.filter(Q(start_date__range=[first_date, last_date]) | Q(
+        end_date__range=[first_date, last_date]))
+    start, end, events_data = generateEventsData(events,
+                                                 calendar_data,
+                                                 current_month,
+                                                 current_year)
+    calendar_context['events_data'] = events_data
+    calendar_context['event_start'] = start
+    calendar_context['event_end'] = end
+    return (error, calendar_context)
+
+
 def validateEventDetails(req):
     response = True
     error = None
@@ -163,11 +254,12 @@ def validateEventDetails(req):
         response = False
         error = 'Empty values not allowed!'
 
-    return(response, error)
+    return (response, error)
 
 
 @ensure_csrf_cookie
 def home(request):
+    """ Loads the calendar for current month and year if request == GET else the calendar for month and year mentioned in the POST request """
     error = None
     if request.method == 'POST':
         req = request.POST
@@ -178,29 +270,15 @@ def home(request):
                 current_month = int(current_month)
                 current_year = int(current_year)
                 if 1 <= current_month <= 12 and year_from <= current_year <= year_to:
-                    calendar_context['current_month'] = current_month
-                    calendar_context['current_year'] = current_year
-                    calendar_data = generateCalendarData(current_month,
-                                                         current_year)
-                    calendar_context['calendar_data'] = calendar_data
-                    print(calendar_data)
-                    events = Event.objects.all()
-                    start, end, events_data = generateEventsData(events,
-                                                                 calendar_data,
-                                                                 current_month,
-                                                                 current_year)
-                    calendar_context['events_data'] = events_data
-                    calendar_context['event_start'] = start
-                    calendar_context['event_end'] = end
-                    print(events_data, start, end)
-
+                    error, calendar_context = processContext(current_month,
+                                                             current_year,
+                                                             'show')
                 else:
                     error = 'Out of bounds!'
             else:
                 error = 'Invalid month or year!'
         else:
             error = 'Data not received!'
-
         if error:
             return HttpResponseBadRequest(error)
         else:
@@ -211,21 +289,9 @@ def home(request):
     now = datetime.datetime.now()
     current_month = now.month
     current_year = now.year
-    current_day = now.day
-    calendar_context['current_month'] = current_month
-    calendar_context['current_year'] = current_year
-    calendar_context['current_day'] = current_day
-    calendar_data = generateCalendarData(current_month,
-                                         current_year)
-    calendar_context['calendar_data'] = calendar_data
-    events = Event.objects.all()
-    start, end, events_data = generateEventsData(events,
-                                                 calendar_data,
-                                                 current_month,
-                                                 current_year)
-    calendar_context['events_data'] = events_data
-    calendar_context['event_start'] = start
-    calendar_context['event_end'] = end
+    error, calendar_context = processContext(current_month,
+                                             current_year,
+                                             'show')
     return render(request, 'index.html', context=calendar_context)
 
 
@@ -238,52 +304,26 @@ def create_event(request):
         if req:
             response, error = validateEventDetails(req)
             if response:
-                event_name = req.get('event_name')
-                event_location = req.get('event_location')
-                event_start_date = req.get('event_start_date')
-                event_start_time = req.get('event_start_time')
-                event_end_date = req.get('event_end_date')
-                event_end_time = req.get('event_end_time')
-                event_description = req.get('event_description')
-                start_date = datetime.datetime.strptime(event_start_date + ' ' + event_start_time,
-                                                        '%Y-%m-%d %H:%M')
-                end_date = datetime.datetime.strptime(event_end_date + ' ' + event_end_time,
-                                                      '%Y-%m-%d %H:%M')
-                print(req)
-                if req.get('editing'):
-                    event_id = req.get("event_id")
-                    if event_id:
-                        event = Event.objects.get(id=event_id)
-                        if event:
-                            event.event_name = event_name
-                            event.location = event_location
-                            event.start_date = start_date
-                            event.end_date = end_date
-                            event.description = event_description
-                            event.save()
-                        else:
-                            error = 'No record found for this event id!'
-                    else:
-                        error = 'Blank id received for editing event!'
-                else:
-                    event = Event.objects.create(event_name=event_name,
-                                                 location=event_location,
-                                                 start_date=start_date,
-                                                 end_date=end_date,
-                                                 description=event_description)
                 current_month = req.get("current_month")
                 current_year = req.get("current_year")
-                calendar_data = generateCalendarData(current_month,
-                                                     current_year)
-                calendar_context['calendar_data'] = calendar_data
-                events = Event.objects.all()
-                start, end, events_data = generateEventsData(events,
-                                                             calendar_data,
-                                                             current_month,
-                                                             current_year)
-                calendar_context['events_data'] = events_data
-                calendar_context['event_start'] = start
-                calendar_context['event_end'] = end
+                if current_month and current_year:
+                    current_month = int(current_month)
+                    current_year = int(current_year)
+                    if 1 <= current_month <= 12 and year_from <= current_year <= year_to:
+                        if req.get('editing'):
+                            error, calendar_context = processContext(current_month,
+                                                                     current_year,
+                                                                     'edit',
+                                                                     data=req)
+                        else:
+                            error, calendar_context = processContext(current_month,
+                                                                     current_year,
+                                                                     'create',
+                                                                     data=req)
+                    else:
+                        error = 'Out of bounds!'
+                else:
+                    error = "Invalid month or year!"
 
         else:
             error = 'Data not received!'
@@ -364,28 +404,20 @@ def delete_event(request):
     if request.method == 'POST':
         req = request.POST
         if req:
-            event_id = req.get('event_id')
-            if event_id:
-                event = Event.objects.filter(id=event_id)
-                if event:
-                    event.delete()
-                    current_month = req.get("current_month")
-                    current_year = req.get("current_year")
-                    calendar_data = generateCalendarData(current_month,
-                                                         current_year)
-                    calendar_context['calendar_data'] = calendar_data
-                    events = Event.objects.all()
-                    start, end, events_data = generateEventsData(events,
-                                                                 calendar_data,
-                                                                 current_month,
-                                                                 current_year)
-                    calendar_context['events_data'] = events_data
-                    calendar_context['event_start'] = start
-                    calendar_context['event_end'] = end
+            current_month = req.get("current_month")
+            current_year = req.get("current_year")
+            if current_month and current_year:
+                current_month = int(current_month)
+                current_year = int(current_year)
+                if 1 <= current_month <= 12 and year_from <= current_year <= year_to:
+                    error, calendar_context = processContext(current_month,
+                                                             current_year,
+                                                             'delete',
+                                                             data=req)
                 else:
-                    error = 'No data found for this event id!'
+                    error = 'Out of bounds!'
             else:
-                error = 'Blank event id not allowed!'
+                error = 'Invalid month or year!'
         else:
             error = 'Data not received!'
 
