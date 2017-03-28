@@ -5,9 +5,15 @@ from .models import Event
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['id','__str__', 'location', 'start_date', 'end_date']
+    list_display = ['id',
+                    '__str__',
+                    'location',
+                    'start_date',
+                    'end_date',
+                    'description']
+
     class Meta:
-    	model = Event
-    		
+        model = Event
+
 
 admin.site.register(Event, EventAdmin)
