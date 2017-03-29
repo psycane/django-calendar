@@ -19,6 +19,14 @@ body {
     padding: 20px;
 }
 
+#calendar_heading select {
+    font-size: 20px;
+    background-color: transparent;
+    color: #2bc493;
+    border: 2px solid #ff8787;
+    border-radius: 5%;
+}
+
 #calendar_body {
     width: 100%;
     position: absolute;

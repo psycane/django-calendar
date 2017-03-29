@@ -28,6 +28,20 @@ $(document).ready(function() {
     var editing = false;
     var event_id_global = '';
 
+    function disableDateAndTime() {
+        $('#create_event_dialog #event_start_date').prop('disabled', true);
+        $('#create_event_dialog #event_end_date').prop('disabled', true);
+        $('#create_event_dialog #event_start_time').prop('disabled', true);
+        $('#create_event_dialog #event_end_time').prop('disabled', true);
+    }
+
+    function enableDateAndTime() {
+        $('#create_event_dialog #event_start_date').prop('disabled', false);
+        $('#create_event_dialog #event_end_date').prop('disabled', false);
+        $('#create_event_dialog #event_start_time').prop('disabled', false);
+        $('#create_event_dialog #event_end_time').prop('disabled', false);
+    }
+
     months = {
         1: 'January',
         2: 'February',
@@ -100,20 +114,16 @@ $(document).ready(function() {
     $(document).on('click', '#create_event_dialog form #event_all_day', function(e) {
         if ($(this).prop('checked')) {
             console.log("checked");
-            $('#create_event_dialog #event_start_date').val(formatDate(year, month, day));
-            $('#create_event_dialog #event_end_date').val(formatDate(year, month, day));
+            current_date = $('#create_event_dialog #event_start_date').val();
+            $('#create_event_dialog #event_start_date').val(current_date);
+            $('#create_event_dialog #event_end_date').val(current_date);
             $('#create_event_dialog #event_start_time').val('00:00');
             $('#create_event_dialog #event_end_time').val('23:59');
-            $('#create_event_dialog #event_start_date').prop('disabled', true);
-            $('#create_event_dialog #event_end_date').prop('disabled', true);
-            $('#create_event_dialog #event_start_time').prop('disabled', true);
-            $('#create_event_dialog #event_end_time').prop('disabled', true);
+            disableDateAndTime();
+
         } else {
             console.log('unchecked');
-            $('#create_event_dialog #event_start_date').prop('disabled', false);
-            $('#create_event_dialog #event_end_date').prop('disabled', false);
-            $('#create_event_dialog #event_start_time').prop('disabled', false);
-            $('#create_event_dialog #event_end_time').prop('disabled', false);
+            enableDateAndTime();
         }
     });
 
@@ -135,10 +145,7 @@ $(document).ready(function() {
         $('#create_event_dialog #event_end_date').val(formatDate(year, month, day));
         $('#create_event_dialog #event_start_time').val('00:00');
         $('#create_event_dialog #event_end_time').val('23:59');
-        $('#create_event_dialog #event_start_date').prop('disabled', false);
-        $('#create_event_dialog #event_end_date').prop('disabled', false);
-        $('#create_event_dialog #event_start_time').prop('disabled', false);
-        $('#create_event_dialog #event_end_time').prop('disabled', false);
+        enableDateAndTime();
         $('#create_event_dialog').dialog({
             draggable: false,
             resizable: false,
@@ -169,10 +176,7 @@ $(document).ready(function() {
         var year = $('#select_year').find('option:selected').attr('value');
         console.log(month, year);
         if ($(this).find('#event_all_day').prop('checked')) {
-            $('#create_event_dialog #event_start_date').prop('disabled', false);
-            $('#create_event_dialog #event_end_date').prop('disabled', false);
-            $('#create_event_dialog #event_start_time').prop('disabled', false);
-            $('#create_event_dialog #event_end_time').prop('disabled', false);
+            enableDateAndTime();
             var data = $(this).serializeArray();
             data.push({
                 name: 'current_month',
@@ -181,10 +185,7 @@ $(document).ready(function() {
                 name: 'current_year',
                 value: year
             });
-            $('#create_event_dialog #event_start_date').prop('disabled', true);
-            $('#create_event_dialog #event_end_date').prop('disabled', true);
-            $('#create_event_dialog #event_start_time').prop('disabled', true);
-            $('#create_event_dialog #event_end_time').prop('disabled', true);
+            disableDateAndTime();
         } else {
             var data = $(this).serializeArray();
             data.push({
@@ -325,10 +326,7 @@ $(document).ready(function() {
                 $('#create_event_dialog #event_end_time').val(result['end_time_24hr']);
                 $('#create_event_dialog #event_description').val(result['description']);
                 $('#create_event_dialog form').find("#event_all_day").prop("checked", false);
-                $('#create_event_dialog #event_start_date').prop('disabled', false);
-                $('#create_event_dialog #event_end_date').prop('disabled', false);
-                $('#create_event_dialog #event_start_time').prop('disabled', false);
-                $('#create_event_dialog #event_end_time').prop('disabled', false);
+                enableDateAndTime();
                 $('#create_event_dialog').dialog({
                     draggable: false,
                     resizable: false,
